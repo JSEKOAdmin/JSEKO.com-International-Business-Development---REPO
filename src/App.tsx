@@ -123,11 +123,11 @@ export default function App() {
               <div className="flex flex-col pr-3 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-display text-base sm:text-lg lg:text-xl font-medium tracking-tight text-[var(--color-text)] whitespace-nowrap">
-                    Available today.
+                    Buy today.
                   </span>
                   <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
                   <span className="hidden md:inline-block text-xs text-[var(--color-text-muted)] truncate max-w-[450px] lg:max-w-[650px]">
-                    Browse pre-built, revenue-ready international assets for immediate acquisition, or contact us to build your custom structure.
+                    Browse existing and turnkey international assets for immediate acquisition, or contact us and build your custom structure.
                   </span>
                 </div>
                 <p className="text-[11px] sm:hidden text-[var(--color-text-muted)] truncate">

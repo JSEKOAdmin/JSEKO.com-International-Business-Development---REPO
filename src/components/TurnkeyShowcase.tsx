@@ -128,7 +128,7 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
             Buy today.
           </h4>
           <p className="text-sm sm:text-base text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-            Browse pre-built, turnkey international assets for immediate acquisition, or contact us to build your custom structure.
+            Browse existing and turnkey international assets for immediate acquisition, or contact us to build your custom structure.
           </p>
         </div>
 

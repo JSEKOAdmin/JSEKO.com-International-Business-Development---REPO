@@ -131,7 +131,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
               Ready to explore portable international assets?
             </h3>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-              Browse available turnkey businesses or book a confidential 20-minute consultation.
+              Browse available and existing turnkey businesses or book a confidential 20-minute consultation.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
               onClick={onExploreTurnkey}
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium border border-[var(--color-border)] hover:border-[var(--color-primary)] text-[var(--color-text)] transition-colors cursor-pointer"
             >
-              <span>View Turnkey Ventures</span>
+              <span>View Businesses</span>
             </button>
             <button
               onClick={onBookConversation}
