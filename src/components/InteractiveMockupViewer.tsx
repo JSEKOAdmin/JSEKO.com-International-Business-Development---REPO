@@ -15,10 +15,13 @@ export const InteractiveMockupViewer: React.FC<InteractiveMockupViewerProps> = (
   const [copied, setCopied] = useState(false);
 
   const handleCopyDomain = () => {
-    navigator.clipboard.writeText(`https://${business.domain}`);
+    const domainWithWww = business.domain.startsWith('www.') ? business.domain : `www.${business.domain}`;
+    navigator.clipboard.writeText(`https://${domainWithWww}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const displayUrlDomain = business.domain.startsWith('www.') ? business.domain : `www.${business.domain}`;
 
   return (
     <div className="bg-white dark:bg-[#1a1914] rounded-2xl border border-[#dcd9d3] dark:border-[#302e26] overflow-hidden shadow-lg">
@@ -33,7 +36,7 @@ export const InteractiveMockupViewer: React.FC<InteractiveMockupViewerProps> = (
           </div>
           <div className="ml-3 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-md bg-white dark:bg-[#14130f] border border-[#d4d1ca] dark:border-[#3a382d] text-xs font-mono text-[#6f6d66] dark:text-[#9c9a90]">
             <Lock className="w-3 h-3 text-emerald-600" />
-            <span>https://{business.domain}</span>
+            <span>https://{displayUrlDomain}</span>
             <button 
               onClick={handleCopyDomain}
               className="ml-1.5 hover:text-[#1c1b18] dark:hover:text-white"

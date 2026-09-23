@@ -66,7 +66,7 @@ export const TermsAndPrivacyPage: React.FC<TermsAndPrivacyPageProps> = ({
             </h2>
 
             <p className="text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed mb-5">
-              <strong className="font-semibold text-[var(--color-text)]">JSEKO.com</strong> ("the Company", "we", "us") provides strictly educational and knowledge-based advisory services. Our offerings are designed to share contemporary information, strategies, and perspectives regarding personal, family, and financial security, including digital asset self-custody and financial portability.
+              <strong className="font-semibold text-[var(--color-text)]">JSEKO.com</strong> ("the Company", "we", "us") provides strictly educational and advisory services focused on international business development. Our offerings are designed to share contemporary strategies, pre-built turnkey infrastructure, and perspectives regarding secure global income streams, cross-border corporate structuring, and sovereign financial portability, including digital asset self-custody.
             </p>
 
             <ul className="space-y-3.5 text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed pl-1">
@@ -120,51 +120,15 @@ export const TermsAndPrivacyPage: React.FC<TermsAndPrivacyPageProps> = ({
             </ul>
           </section>
 
-          {/* 3. Multiple Session Packages & Expiration Policy */}
+          {/* 3. Limitation of Liability */}
           <section className="bg-[var(--color-surface)] border border-[var(--color-border)] dark:border-[#38352b] rounded-2xl p-6 sm:p-8 shadow-xs">
             <div className="flex items-center gap-2.5 text-xs font-mono font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)] mb-3">
-              <Calendar className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4" />
               <span>Section 3</span>
             </div>
 
             <h2 className="font-display text-lg sm:text-xl font-medium text-[var(--color-text)] mb-3">
-              3. Multiple Session Packages & Expiration Policy
-            </h2>
-
-            <ul className="space-y-3.5 text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed pl-1">
-              <li className="flex items-start gap-3">
-                <span className="text-[var(--color-primary)] font-bold text-base leading-none select-none mt-0.5">•</span>
-                <div>
-                  <strong className="font-medium text-[var(--color-text)]">Session Package Terms:</strong>{' '}
-                  Multiple Session packages (typically arranged for block meetings or in-person sessions) are designed to provide structured, ongoing educational guidance.
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[var(--color-primary)] font-bold text-base leading-none select-none mt-0.5">•</span>
-                <div>
-                  <strong className="font-medium text-[var(--color-text)]">180-Day Validity Period:</strong>{' '}
-                  All Multiple Session packages are valid for exactly 180 days starting from the date of purchase. All sessions must be fully scheduled and utilized within this 180-day timeframe.
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[var(--color-primary)] font-bold text-base leading-none select-none mt-0.5">•</span>
-                <div>
-                  <strong className="font-medium text-[var(--color-text)]">Forfeiture:</strong>{' '}
-                  Any unused sessions (including all 10 sessions if none are used) remaining after the 180-day period expires will be automatically forfeited without entitlement to a refund, extension, or credit.
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          {/* 4. Limitation of Liability */}
-          <section className="bg-[var(--color-surface)] border border-[var(--color-border)] dark:border-[#38352b] rounded-2xl p-6 sm:p-8 shadow-xs">
-            <div className="flex items-center gap-2.5 text-xs font-mono font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)] mb-3">
-              <AlertCircle className="w-4 h-4" />
-              <span>Section 4</span>
-            </div>
-
-            <h2 className="font-display text-lg sm:text-xl font-medium text-[var(--color-text)] mb-3">
-              4. Limitation of Liability
+              3. Limitation of Liability
             </h2>
 
             <p className="text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed">

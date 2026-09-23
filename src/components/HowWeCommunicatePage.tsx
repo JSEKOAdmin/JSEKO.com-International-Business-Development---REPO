@@ -25,12 +25,12 @@ export const HowWeCommunicatePage: React.FC<HowWeCommunicatePageProps> = ({
     {
       number: '01',
       title: 'Begin with a short enquiry',
-      body: 'You can introduce yourself and indicate the type of conversation or engagement you are interested in by sending a message via Signal - our username @confidant.01 or book your Introduction Session. There is no need to send sensitive personal, financial or identifying information in your enquiry. Relevant details can be discussed confidentially during the Initial Introduction Session.',
+      body: 'You can indicate what kind of business you are interested in by sending a message via Signal - our username @confidant.01 or book your Introductory Session. There is no need to send sensitive personal or identifying information in your enquiry. Relevant details can be discussed confidentially during our Initial Introductory Session.',
     },
     {
       number: '02',
       title: 'Set up Signal',
-      body: "Signal is JSEKO.com's required communication channel for client conversations. Before your enquiry or Initial Introduction Session, please install the Signal app and create a Signal account. Signal requires a telephone number when registering an account. However, Signal's username and phone-number privacy settings can allow you to contact JSEKO.com without disclosing that number to us.",
+      body: "Signal is JSEKO.com's required communication channel for client conversations. Before your enquiry or Initial Introduction Session, please install the Signal app and create a Signal account. Signal requires a telephone number when registering an account and enables you to contact JSEKO.com without disclosing personal details.",
       action: {
         label: 'Get Signal App',
         href: 'https://signal.org/install',
@@ -40,7 +40,7 @@ export const HowWeCommunicatePage: React.FC<HowWeCommunicatePageProps> = ({
     {
       number: '03',
       title: 'Initial Introduction Session',
-      body: 'The 20-minute Initial Introduction Session is the first substantive point of communication with JSEKO.com. It provides a private, focused opportunity to describe your circumstances at a high level, explain what you are seeking, and consider whether an ongoing conversation or engagement may be appropriate.',
+      body: 'The 20-minute Initial Introduction Session is the first substantive point of communication with JSEKO.com. It provides a private, focused opportunity to discuss your business interest and structure at a high level, and consider whether ongoing conversation or engagement is appropriate.',
       action: onBookSession ? {
         label: 'Book 20-Min Session',
         onClick: onBookSession,
@@ -50,7 +50,7 @@ export const HowWeCommunicatePage: React.FC<HowWeCommunicatePageProps> = ({
     {
       number: '04',
       title: 'Continue privately',
-      body: 'Further sessions are agreed mutually and, where appropriate, take place through Signal. Signal supports encrypted messaging and voice or video calls and can allow you to communicate via your Signal username without disclosing your name or telephone number to JSEKO.com.',
+      body: 'Further sessions are agreed mutually and, where appropriate, take place through Signal. Signal supports encrypted messaging and voice or video calls and can allow you to communicate via your Signal username without disclosing your name or telephone number to JSEKO.com until you are comfortble and ready to proceed.',
     },
   ];
 

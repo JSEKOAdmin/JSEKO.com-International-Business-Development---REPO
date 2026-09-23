@@ -57,7 +57,7 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
             </h1>
 
             <p className="text-[var(--color-text-muted)] text-base sm:text-lg leading-relaxed">
-              Pre-built turnkey businesses and website infrastructure remove months of setup between an idea and an international income stream. We help you establish a global business identity from day one while reducing reliance on local business conditions and political uncertainty.
+              Global existing and turnkey businesses and website infrastructure saving months of setup between an idea and an international income stream. We help you establish a global business identity from day one while reducing reliance on local business conditions and political uncertainty.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
                           <span className="w-2 h-2 rounded-full bg-emerald-400/80 inline-block" />
                         </div>
                         <div className="px-2.5 py-0.5 rounded text-[10px] font-mono bg-[var(--color-bg)]/80 border border-[var(--color-divider)] text-[var(--color-text-muted)] group-hover/thumb:text-[var(--color-primary)] group-hover/thumb:border-[var(--color-primary)]/40 max-w-[180px] truncate text-center transition-colors">
-                          https://{displayDomain}
+                          https://{displayDomain.startsWith('www.') ? displayDomain : `www.${displayDomain}`}
                         </div>
                         <div className="w-6 flex items-center justify-end">
                           <ExternalLink className="w-3 h-3 text-[var(--color-text-muted)] group-hover/thumb:text-[var(--color-primary)] transition-colors" />
@@ -227,21 +227,6 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
                     {biz.description}
                   </p>
 
-                  {biz.id === 'cryptoconfidant' && onOpenHowWeCommunicate && (
-                    <div className="mt-2.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenHowWeCommunicate();
-                        }}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-[#c85a2b] dark:text-[#ea7e52] hover:underline cursor-pointer"
-                      >
-                        <span>How we communicate protocol</span>
-                        <span>→</span>
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-[var(--color-divider)] dark:border-[#423e34] flex items-center justify-between gap-2">

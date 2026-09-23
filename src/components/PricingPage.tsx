@@ -57,11 +57,11 @@ export const PricingPage: React.FC<PricingPageProps> = ({
   const [calInstanceKey, setCalInstanceKey] = useState(0);
 
   const headerEyebrow = content?.headerEyebrow || 'JSEKO.COM · INTERNATIONAL BUSINESS DEVELOPMENT';
-  const headerTitle = content?.headerTitle || 'Confidential Conversation';
+  const headerTitle = content?.headerTitle || 'Conversation';
   const headerSubtitle = content?.headerSubtitle ||
-    `You are booking a confidential, practical conversation about a business you’ve selected - how it fits your goals, which markets it can reach, and what it will take for you to run it well.
+    `You are booking a confidential, practical conversation about a business you’ve selected - how it fits your goals, which markets it can reach, and what may be required to operate it effectively.
 
-If you’re dealing with pressure, scrutiny or changing rules where you live, or just want a more secure business, it makes more sense to put your energy into building a business structure that is difficult to interfere with, easy to move, and doesn’t depend on a single jurisdiction.
+If you’re dealing with pressure, scrutiny or changing rules where you live, or just want a more secure business, it may make more sense to put your energy into building a business structure that is difficult to interfere with, easy to move, and doesn’t depend on a single jurisdiction.
 
 Instead of investing your time and energy into a business that is vulnerable and could be taken from you, you can use that energy to develop something more sovereign: a global online business that does not depend on where you live and can continue to provide income when your personal circumstances change.
 
@@ -76,7 +76,7 @@ To see how JSEKO.com International Business Development could play that role, or
       description:
         content?.tier1Description ||
         'Align your vision, explore secure cross-border alternatives, and build a resilient global business to protect your future and achieve true financial Freedom.',
-      features: ['This payment is non-refundable. Payments are securely processed by JSEKMarketing.com.'],
+      features: ['This payment is non-refundable.'],
       buttonLabel: content?.tier1ButtonLabel || 'Book & Pay',
       accent: true,
     },
