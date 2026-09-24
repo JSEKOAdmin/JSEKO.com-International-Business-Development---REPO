@@ -57,7 +57,8 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
             </h1>
 
             <p className="text-[var(--color-text-muted)] text-base sm:text-lg leading-relaxed">
-              Global existing and turnkey businesses and website infrastructure saving months of setup between an idea and an international income stream. We help you establish a global business identity from day one while reducing reliance on local business conditions and political uncertainty.
+              Established global and turnkey businesses and website infrastructure, saving months of setup between an idea and an international income stream. We help you establish a global business identity from day one while reducing reliance on local business conditions and political uncertainty.
+
             </p>
           </div>
 
