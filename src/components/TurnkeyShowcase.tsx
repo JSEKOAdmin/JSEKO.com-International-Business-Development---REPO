@@ -53,12 +53,12 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
             </div>
             
             <h1 className="font-display text-3xl sm:text-5xl lg:text-[3.25rem] font-medium tracking-[-0.01em] text-[var(--color-text)] leading-[1.08] mb-6">
-              A Direct Path to International Markets and Income.
+              Earn Globally. Live Where You Want.
             </h1>
 
             <p className="text-[var(--color-text-muted)] text-base sm:text-lg leading-relaxed">
-              Established global and turnkey businesses and website infrastructure, saving months of setup between an idea and an international income stream. We help you establish a global business identity from day one while reducing reliance on local business conditions and political uncertainty.
-
+              JSEKO.com provides ready-to-operate international businesses starting from US$15,000. You run them from your current home, the beach or the next city you haven't chosen yet. We connect you with established legal and banking partners who specialize in cross-border structures. You focus on growing an asset that pays you independent of any single country's political or economic uncertainty.
+Explore available businesses below, or book a 20-minute conversation for US$75.
             </p>
           </div>
 
@@ -66,10 +66,10 @@ export const TurnkeyShowcase: React.FC<TurnkeyShowcaseProps> = ({ onReserve, onH
           <div className="lg:col-span-5 lg:pt-8">
             <div className="bg-[var(--color-surface-offset)] border border-[var(--color-border)] p-6 sm:p-7 rounded-xl shadow-xs">
               <h4 className="font-display text-base sm:text-xl font-medium tracking-tight text-[var(--color-text)] max-w-2xl leading-[1.15] mb-2">
-                Built Beyond Borders.
+                OVERVIEW
               </h4>
               <p className="text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed">
-                True financial independence requires a business presence beyond local borders. JSEKO.com provides the infrastructure for a resilient, cross-border business you can operate wherever you reside. When needed, we provide ongoing research, development, strategy, and marketing support.
+                Select a ready-to-go portable international business. Structure it in a stable jurisdiction. Run from your desired location. Serving global markets.
               </p>
             </div>
           </div>

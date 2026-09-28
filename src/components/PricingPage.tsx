@@ -58,14 +58,6 @@ export const PricingPage: React.FC<PricingPageProps> = ({
 
   const headerEyebrow = content?.headerEyebrow || 'JSEKO.COM · INTERNATIONAL BUSINESS DEVELOPMENT';
   const headerTitle = content?.headerTitle || 'Conversation';
-  const headerSubtitle = content?.headerSubtitle ||
-    `You are booking a confidential, practical conversation about a business you’ve selected - how it fits your goals, which markets it can reach, and what may be required to operate it effectively.
-
-If you’re dealing with pressure, scrutiny or changing rules where you live, or just want a more secure business, it may make more sense to put your energy into building a business structure that is difficult to interfere with, easy to move, and doesn’t depend on a single jurisdiction.
-
-Instead of investing your time and energy into a business that is vulnerable and could be taken from you, you can use that energy to develop something more sovereign: a global online business that does not depend on where you live and can continue to provide income when your personal circumstances change.
-
-To see how JSEKO.com International Business Development could play that role, or to explore a custom cross‑border structure, book a 20‑minute conversation.`;
 
   const tiers: Tier[] = [
     {
@@ -75,7 +67,7 @@ To see how JSEKO.com International Business Development could play that role, or
       price: content?.tier1Price || 'US$75',
       description:
         content?.tier1Description ||
-        'Align your vision, explore secure cross-border alternatives, and build a resilient global business to protect your future and achieve true financial Freedom.',
+        "Own a business that moves with you. Operate beyond local rules and single-jurisdiction risk. Start with a confidential 20-minute conversation about what's possible.",
       features: ['This payment is non-refundable.'],
       buttonLabel: content?.tier1ButtonLabel || 'Book & Pay',
       accent: true,
@@ -142,8 +134,22 @@ To see how JSEKO.com International Business Development could play that role, or
               {headerTitle}
             </h1>
 
-            <div className="text-base sm:text-m text-[var(--color-text-muted)] leading-relaxed max-w-none whitespace-pre-line">
-              {headerSubtitle}
+            <div className="text-base sm:text-m text-[var(--color-text-muted)] leading-relaxed max-w-none space-y-4">
+              {content?.headerSubtitle ? (
+                <div className="whitespace-pre-line">{content.headerSubtitle}</div>
+              ) : (
+                <>
+                  <p>
+                    You are booking a confidential, practical conversation about a business you've selected—how it fits your goals, which markets you can reach, and what's required to operate it effectively.
+                  </p>
+                  <p>
+                    Local risks demand global solutions. A jurisdiction-independent business moves with you, operates beyond the reach of any single regulator, and survives personal upheaval. You're not trapped. You're portable.
+                  </p>
+                  <p className="font-bold text-[var(--color-text)]">
+                    Book your 20-minute conversation for US$75.
+                  </p>
+                </>
+              )}
             </div>
 
 
