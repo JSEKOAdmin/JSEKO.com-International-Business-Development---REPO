@@ -62,8 +62,8 @@ export const PricingPage: React.FC<PricingPageProps> = ({
   const tiers: Tier[] = [
     {
       id: 'intro',
-      topLabel: content?.tier1TopLabel || '20 MINUTES',
-      name: content?.tier1Name || 'Introductory Session',
+      topLabel: content?.tier1TopLabel || '',
+      name: content?.tier1Name || '20-minute Conversation',
       price: content?.tier1Price || 'US$75',
       description:
         content?.tier1Description ||
@@ -181,29 +181,20 @@ export const PricingPage: React.FC<PricingPageProps> = ({
                   <div className="space-y-4">
 
                     {/* TOP LABEL */}
-
-                    <div className="flex min-h-[32px] flex-wrap items-center gap-3">
-
-                      <span className="text-[16px] font-mono font-semibold uppercase tracking-[0.3em] text-[var(--color-primary)]">
-                        {tier.topLabel}
-                      </span>
-
-                      {tier.accent && (
-                        <span className="inline-flex items-center rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--color-primary)]">
-                          Start Here
+                    {tier.topLabel ? (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="text-[16px] font-mono font-semibold uppercase tracking-[0.3em] text-[var(--color-primary)]">
+                          {tier.topLabel}
                         </span>
-                      )}
-
-                    </div>
+                      </div>
+                    ) : null}
 
                     {/* NAME */}
-
-                    <div className="min-h-[28px] text-lg font-semibold text-[var(--color-text)]">
+                    <div className="text-xl font-semibold text-[var(--color-text)]">
                       {tier.name}
                     </div>
 
                     {/* PRICE */}
-
                     <div className="min-h-[72px] font-serif text-5xl md:text-6xl text-[var(--color-primary)] tracking-tight">
                       {tier.price}
                     </div>
@@ -312,7 +303,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
           className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="introductory-session-modal-title"
+          aria-labelledby="conversation-modal-title"
         >
 
           {/* =====================================================
@@ -344,14 +335,14 @@ export const PricingPage: React.FC<PricingPageProps> = ({
                 </div>
 
                 <h2
-                  id="introductory-session-modal-title"
+                  id="conversation-modal-title"
                   className="font-serif text-2xl sm:text-3xl text-[var(--color-text)] leading-tight"
                 >
-                  Introductory Session
+                  20-minute Conversation
                 </h2>
 
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                  20 minutes · US$75
+                  US$75
                 </p>
 
               </div>
@@ -414,7 +405,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
 
                       <p>
                         Please provide only the information necessary to
-                        arrange your introductory session.
+                        arrange your conversation.
                       </p>
 
                       <p className="mt-3 font-semibold text-[var(--color-text)]">

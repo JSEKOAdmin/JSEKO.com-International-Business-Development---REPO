@@ -69,7 +69,7 @@ Explore available businesses below, or book a 20-minute conversation for US$75.
                 OVERVIEW
               </h4>
               <p className="text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed">
-                Select a ready-to-go international business. Structure it in a stable jurisdiction. Run from your desired location. Serving global markets.
+                Select a ready-to-go portable international business. Structure it in a stable jurisdiction. Run from your desired location. Serving global markets.
               </p>
             </div>
           </div>

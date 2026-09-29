@@ -649,7 +649,7 @@ export default function App() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4 text-[var(--color-primary)]" />
-                    20-Minute Introductory Sessions
+                    20-Minute Conversations
                   </span>
                 </div>
               </div>
