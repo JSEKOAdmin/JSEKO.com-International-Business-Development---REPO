@@ -1,5 +1,22 @@
 export type AppMode = 'client_portal' | 'strategic_analysis';
 
+export type ConsultantName = 'Gary' | 'Richard' | 'Dave' | 'Axcel';
+
+export interface ConsultantProfile {
+  id: ConsultantName;
+  name: ConsultantName;
+  calLink: string;
+  eventTypeId: number;
+}
+
+export interface BookingMetadata {
+  consultant: ConsultantName;
+  assignedConsultant: ConsultantName;
+  calLink: string;
+  sessionType: string;
+  price: string;
+}
+
 export interface TurnkeyBusiness {
   id: string;
   name: string;

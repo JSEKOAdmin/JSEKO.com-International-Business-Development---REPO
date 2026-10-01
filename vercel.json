@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/cal-trpc/:path*",
+      "destination": "https://cal.com/api/trpc/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
