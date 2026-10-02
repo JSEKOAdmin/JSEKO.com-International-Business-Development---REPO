@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Cal from '@calcom/embed-react';
 import {
   ArrowLeft,
@@ -9,6 +9,8 @@ import {
   UserCheck,
   Check,
   Calendar,
+  RefreshCw,
+  Mail,
 } from 'lucide-react';
 import {
   SiteContent,
@@ -16,6 +18,7 @@ import {
   ConsultantProfile,
   BookingMetadata,
 } from '../types';
+import { JoinUpdatesModal } from './JoinUpdatesModal';
 
 export const CONSULTANTS: ConsultantProfile[] = [
   {
@@ -71,9 +74,9 @@ async function fetchConsultantAvailableSlotCount(
 
     const url = `/api/cal-trpc/slots/getSchedule?input=${encodeURIComponent(
       JSON.stringify(inputPayload)
-    )}`;
+    )}&_t=${Date.now()}`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       const slotsMap = data?.result?.data?.json?.slots;
@@ -122,6 +125,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
   content,
 }) => {
   const [selectedTier, setSelectedTier] = useState<TierId | null>(null);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedConsultant, setSelectedConsultant] =
     useState<ConsultantName>('Gary');
   const [slotCounts, setSlotCounts] = useState<
@@ -154,42 +158,192 @@ export const PricingPage: React.FC<PricingPageProps> = ({
     document.body.scrollTop = 0;
   }, []);
 
-  // Load real, conflict-tested available slot counts from Cal.com for each consultant
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoadingCounts(true);
-    Promise.all(
-      CONSULTANTS.map(async (consultant) => {
-        const count = await fetchConsultantAvailableSlotCount(consultant);
-        return [consultant.id, count] as const;
-      })
-    )
-      .then((entries) => {
-        if (!isMounted) return;
-        const updated: Record<ConsultantName, number | null> = {
-          Gary: null,
-          Richard: null,
-          Dave: null,
-          Axcel: null,
-        };
-        for (const [id, count] of entries) {
-          updated[id] = count;
-        }
-        setSlotCounts(updated);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoadingCounts(false);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   /*
-   * Forces a fresh Cal.com embed whenever the modal is opened
-   * or the user switches consultants.
+   * Forces a fresh Cal.com embed whenever the modal is opened,
+   * the user switches consultants, or clicks Refresh.
    */
   const [calInstanceKey, setCalInstanceKey] = useState(0);
+
+  // Tracks any booking UID currently sitting on Cal.com's "Pending payment" screen
+  const [pendingPaymentUid, setPendingPaymentUid] = useState<string | null>(null);
+  const [isReleasingUnpaidSlot, setIsReleasingUnpaidSlot] = useState(false);
+  const pendingPaymentUidRef = useRef<string | null>(null);
+  const paymentStepStartedAtRef = useRef<number>(0);
+  const hasEnteredPaymentRouteRef = useRef<boolean>(false);
+  const isCancellingUnpaidRef = useRef<boolean>(false);
+
+  // Load real, conflict-tested available slot counts from Cal.com for each consultant
+  const refreshAvailability = useCallback(async () => {
+    setIsLoadingCounts(true);
+    setCalInstanceKey((current) => current + 1);
+    try {
+      const entries = await Promise.all(
+        CONSULTANTS.map(async (consultant) => {
+          const count = await fetchConsultantAvailableSlotCount(consultant);
+          return [consultant.id, count] as const;
+        })
+      );
+      const updated: Record<ConsultantName, number | null> = {
+        Gary: null,
+        Richard: null,
+        Dave: null,
+        Axcel: null,
+      };
+      for (const [id, count] of entries) {
+        updated[id] = count;
+      }
+      setSlotCounts(updated);
+    } finally {
+      setIsLoadingCounts(false);
+    }
+  }, []);
+
+  /**
+   * Calls our server middleware (/api/cal-cancel-unpaid) to verify if the booking
+   * is still unpaid ("Pending payment"). If unpaid, cancels it in Cal.com so the
+   * time slot is immediately released, and reloads the consultant's calendar.
+   */
+  const cancelUnpaidBookingAndReset = useCallback(
+    async (uid: string, options: { reloadEmbed: boolean } = { reloadEmbed: true }) => {
+      if (!uid || isCancellingUnpaidRef.current) return;
+      isCancellingUnpaidRef.current = true;
+      if (options.reloadEmbed) {
+        setIsReleasingUnpaidSlot(true);
+      }
+
+      try {
+        const res = await fetch('/api/cal-cancel-unpaid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid }),
+        });
+
+        const result = res.ok ? await res.json() : { cancelled: true, paid: false };
+
+        // Clear the pending payment tracking ref/state
+        if (pendingPaymentUidRef.current === uid) {
+          pendingPaymentUidRef.current = null;
+          setPendingPaymentUid(null);
+          hasEnteredPaymentRouteRef.current = false;
+        }
+
+        if (result?.paid === true) {
+          // Client actually completed payment! Keep confirmation view and refresh counts
+          setIsReleasingUnpaidSlot(false);
+          const entries = await Promise.all(
+            CONSULTANTS.map(async (consultant) => {
+              const count = await fetchConsultantAvailableSlotCount(consultant);
+              return [consultant.id, count] as const;
+            })
+          );
+          const updated: Record<ConsultantName, number | null> = {
+            Gary: null,
+            Richard: null,
+            Dave: null,
+            Axcel: null,
+          };
+          for (const [id, count] of entries) {
+            updated[id] = count;
+          }
+          setSlotCounts(updated);
+          return;
+        }
+
+        // Unpaid booking was cancelled in Cal.com — reload consultant calendar & slot counts
+        await refreshAvailability();
+      } catch {
+        await refreshAvailability();
+      } finally {
+        isCancellingUnpaidRef.current = false;
+        setIsReleasingUnpaidSlot(false);
+      }
+    },
+    [refreshAvailability]
+  );
+
+  useEffect(() => {
+    refreshAvailability();
+  }, [refreshAvailability]);
+
+  // Listen for Cal.com embed events:
+  // 1) Capture the booking `uid` when the user enters the Payment page (bookingSuccessfulV2 / bookingSuccessful)
+  // 2) If the user clicks "Cancel" on the Cal.com Payment page (routing away from /payment to /jsek-marketing-llc),
+  //    automatically cancel the "Pending payment" booking in Cal.com, release the slot, and reload the consultant's calendar.
+  useEffect(() => {
+    const handleCalMessage = (event: MessageEvent) => {
+      const msg = event.data;
+      if (!msg || typeof msg !== 'object') return;
+      const fullType = typeof msg.fullType === 'string' ? msg.fullType : '';
+      const type = typeof msg.type === 'string' ? msg.type : '';
+      const payload = msg.data && typeof msg.data === 'object' ? msg.data : {};
+
+      const isAction = (name: string) =>
+        type === name || fullType.endsWith(`:${name}`);
+
+      // 1. Booking created -> transitioning to Cal.com Payment screen
+      if (isAction('bookingSuccessfulV2') || isAction('bookingSuccessful')) {
+        const extractedUid =
+          (typeof payload.uid === 'string' && payload.uid) ||
+          (payload.booking &&
+            typeof payload.booking === 'object' &&
+            typeof (payload.booking as { uid?: unknown }).uid === 'string' &&
+            ((payload.booking as { uid: string }).uid)) ||
+          null;
+
+        if (extractedUid) {
+          pendingPaymentUidRef.current = extractedUid;
+          setPendingPaymentUid(extractedUid);
+          paymentStepStartedAtRef.current = Date.now();
+          hasEnteredPaymentRouteRef.current = false;
+        }
+        return;
+      }
+
+      // 2. Explicit bookingCancelled event
+      if (isAction('bookingCancelled')) {
+        const uid = pendingPaymentUidRef.current;
+        if (uid) {
+          cancelUnpaidBookingAndReset(uid, { reloadEmbed: true });
+        } else {
+          refreshAvailability();
+        }
+        return;
+      }
+
+      // 3. Detect navigation while a Pending payment booking is active
+      if (pendingPaymentUidRef.current) {
+        const elapsedMs = Date.now() - paymentStepStartedAtRef.current;
+
+        if (isAction('__routeChanged')) {
+          if (!hasEnteredPaymentRouteRef.current && elapsedMs < 2000) {
+            // First route change right after booking creation is entering /payment/[uid]
+            hasEnteredPaymentRouteRef.current = true;
+            return;
+          }
+
+          // Subsequent route change = user clicked "Cancel" on the payment screen (or completed payment)
+          cancelUnpaidBookingAndReset(pendingPaymentUidRef.current, {
+            reloadEmbed: true,
+          });
+          return;
+        }
+
+        // If user clicked any link on the profile page or iframe reloaded after payment screen was entered
+        if (
+          isAction('eventTypeSelected') ||
+          ((isAction('linkReady') || isAction('__iframeReady')) &&
+            (hasEnteredPaymentRouteRef.current || elapsedMs > 2500))
+        ) {
+          cancelUnpaidBookingAndReset(pendingPaymentUidRef.current, {
+            reloadEmbed: true,
+          });
+        }
+      }
+    };
+
+    window.addEventListener('message', handleCalMessage);
+    return () => window.removeEventListener('message', handleCalMessage);
+  }, [cancelUnpaidBookingAndReset, refreshAvailability]);
 
   const headerEyebrow =
     content?.headerEyebrow || 'JSEKO.COM · INTERNATIONAL BUSINESS DEVELOPMENT';
@@ -216,12 +370,21 @@ export const PricingPage: React.FC<PricingPageProps> = ({
   const activeTier = tiers.find((tier) => tier.id === selectedTier);
 
   const openIntroModal = () => {
+    pendingPaymentUidRef.current = null;
+    setPendingPaymentUid(null);
+    hasEnteredPaymentRouteRef.current = false;
+    setIsReleasingUnpaidSlot(false);
     setCalInstanceKey((current) => current + 1);
     setSelectedTier('intro');
   };
 
   const closeModal = () => {
+    const unpaidUid = pendingPaymentUidRef.current;
     setSelectedTier(null);
+    setIsReleasingUnpaidSlot(false);
+    if (unpaidUid) {
+      cancelUnpaidBookingAndReset(unpaidUid, { reloadEmbed: false });
+    }
   };
 
   return (
@@ -390,29 +553,43 @@ export const PricingPage: React.FC<PricingPageProps> = ({
                         })}
                       </div>
 
-                      {/* SELECTED CONSULTANT LIVE CAL.COM AVAILABLE SLOTS DETAIL */}
+                      {/* SELECTED CONSULTANT LIVE CAL.COM AVAILABLE SLOTS DETAIL + REFRESH */}
                       <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl border border-[var(--color-primary)]/25 bg-[var(--color-primary)]/8 px-3 py-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-medium text-[var(--color-text)]">
+                        <span className="inline-flex items-center gap-2 font-medium text-[var(--color-text)] min-w-0">
                           <span className="h-2 w-2 rounded-full bg-[var(--color-primary)] animate-pulse shrink-0" />
                           {isLoadingCounts ? (
-                            <span>
-                              Checking <strong>{activeConsultant.name}&apos;s</strong> live Cal.com schedule...
+                            <span className="truncate">
+                              Refreshing <strong>{activeConsultant.name}&apos;s</strong> live Cal.com schedule...
                             </span>
                           ) : activeAvailableSlots !== null ? (
-                            <span>
+                            <span className="leading-snug">
                               <strong>{activeConsultant.name}</strong> has{' '}
                               <strong className="text-[var(--color-primary)]">
                                 {activeAvailableSlots} available {activeAvailableSlots === 1 ? 'slot' : 'slots'}
                               </strong>{' '}
-                              in the next 7 days (live Cal.com sync)
+                              in the next 7 days
                             </span>
                           ) : (
-                            <span>
+                            <span className="leading-snug">
                               <strong>{activeConsultant.name}&apos;s</strong> live availability is ready in Cal.com
                             </span>
                           )}
                         </span>
-                        <Calendar className="w-3.5 h-3.5 text-[var(--color-primary)] shrink-0" />
+
+                        <button
+                          type="button"
+                          onClick={refreshAvailability}
+                          disabled={isLoadingCounts}
+                          title="Refresh live availability from Cal.com"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-primary)]/30 bg-[var(--color-surface)] px-2.5 py-1 text-[11px] font-mono font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white active:scale-95 transition-all shrink-0 cursor-pointer disabled:opacity-60"
+                        >
+                          <RefreshCw
+                            className={`w-3 h-3 shrink-0 ${
+                              isLoadingCounts ? 'animate-spin' : ''
+                            }`}
+                          />
+                          <span>Refresh</span>
+                        </button>
                       </div>
                     </div>
 
@@ -504,32 +681,41 @@ export const PricingPage: React.FC<PricingPageProps> = ({
             <h3 className="font-display text-lg sm:text-xl font-medium tracking-tight text-[var(--color-text)] mb-3.5 sm:mb-4">
               Get the Feeling of Freedom
             </h3>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3">
               <a
                 href="https://www.facebook.com/profile.php?id=61594348593994"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-xs sm:text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-all shadow-2xs"
+                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-xs sm:text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-all shadow-2xs"
               >
                 <svg className="w-4 h-4 text-[var(--color-primary)] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                 </svg>
                 <span>Facebook</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0 hidden xs:inline sm:inline" />
               </a>
 
               <a
                 href="https://www.tiktok.com/@jsek.marketing"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-xs sm:text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-all shadow-2xs"
+                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-xs sm:text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-all shadow-2xs"
               >
                 <svg className="w-4 h-4 text-[var(--color-primary)] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
                 </svg>
                 <span>TikTok</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0 hidden xs:inline sm:inline" />
               </a>
+
+              <button
+                type="button"
+                onClick={() => setIsJoinModalOpen(true)}
+                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-xs sm:text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+              >
+                <Mail className="w-4 h-4 text-[var(--color-primary)] shrink-0" />
+                <span>Join</span>
+              </button>
             </div>
           </div>
 
@@ -593,16 +779,59 @@ export const PricingPage: React.FC<PricingPageProps> = ({
               </div>
 
               {/* =================================================
-                   CLOSE
+                   REFRESH + CLOSE
               ================================================= */}
 
-              <button
-                onClick={closeModal}
-                aria-label="Close"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-text)] active:scale-95 cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                {pendingPaymentUid && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      cancelUnpaidBookingAndReset(pendingPaymentUid, {
+                        reloadEmbed: true,
+                      })
+                    }
+                    disabled={isReleasingUnpaidSlot}
+                    className="inline-flex h-10 sm:h-11 items-center gap-1.5 rounded-full border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 px-3 sm:px-3.5 text-xs font-mono font-semibold text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)] hover:text-white active:scale-95 cursor-pointer disabled:opacity-60"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
+                    <span>Change Slot</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (pendingPaymentUidRef.current) {
+                      cancelUnpaidBookingAndReset(pendingPaymentUidRef.current, {
+                        reloadEmbed: true,
+                      });
+                    } else {
+                      refreshAvailability();
+                    }
+                  }}
+                  disabled={isLoadingCounts || isReleasingUnpaidSlot}
+                  title="Refresh Cal.com calendar availability"
+                  className="inline-flex h-10 sm:h-11 items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-offset)] px-3 sm:px-3.5 text-xs font-mono font-medium text-[var(--color-text-muted)] transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] active:scale-95 cursor-pointer disabled:opacity-60"
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 shrink-0 ${
+                      isLoadingCounts || isReleasingUnpaidSlot
+                        ? 'animate-spin text-[var(--color-primary)]'
+                        : ''
+                    }`}
+                  />
+                  <span className="hidden xs:inline sm:inline">Refresh</span>
+                </button>
+
+                <button
+                  onClick={closeModal}
+                  aria-label="Close"
+                  className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-text)] active:scale-95 cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
             </div>
 
@@ -619,11 +848,21 @@ export const PricingPage: React.FC<PricingPageProps> = ({
                 ================================================= */}
 
                 <div
-                  className="overflow-hidden rounded-xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)]"
+                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)]"
                   data-consultant={activeConsultant.name}
                   data-cal-link={activeConsultant.calLink}
                   data-booking-metadata={JSON.stringify(bookingMetadata)}
                 >
+                  {isReleasingUnpaidSlot && (
+                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-[var(--color-bg)]/95 backdrop-blur-xs p-6 text-center">
+                      <RefreshCw className="h-6 w-6 animate-spin text-[var(--color-primary)]" />
+                      <p className="text-sm font-medium text-[var(--color-text)]">
+                        Cancelling unpaid checkout &amp; restoring{' '}
+                        <strong>{activeConsultant.name}&apos;s</strong> time slot...
+                      </p>
+                    </div>
+                  )}
+
                   <input type="hidden" name="consultant" value={activeConsultant.name} />
                   <input type="hidden" name="cal_link" value={activeConsultant.calLink} />
                   <input
@@ -715,6 +954,11 @@ export const PricingPage: React.FC<PricingPageProps> = ({
 
         </div>
       )}
+
+      <JoinUpdatesModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+      />
     </>
   );
 };
