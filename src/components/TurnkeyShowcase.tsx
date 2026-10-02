@@ -69,7 +69,7 @@ Explore available businesses below, or book a 20-minute conversation for US$75.
                 OVERVIEW
               </h4>
               <p className="text-sm sm:text-[0.95rem] text-[var(--color-text-muted)] leading-relaxed">
-                Select a ready-to-go portable international business. Structure it in a stable jurisdiction. Run from your desired location. Serving global markets.
+                Select a ready-to-go international business. Structured in a stable international jurisdiction. Run from your desired location. Serving global markets.
               </p>
             </div>
 
@@ -162,7 +162,7 @@ Explore available businesses below, or book a 20-minute conversation for US$75.
             Buy today.
           </h4>
           <p className="text-sm sm:text-base text-[var(--color-text-muted)] max-w-3xl leading-relaxed">
-            Browse existing and turnkey international assets for immediate acquisition, or contact us to build your custom structure.
+            Browse existing international businesses for immediate acquisition, or contact us to build your custom structure.
           </p>
         </div>
 
